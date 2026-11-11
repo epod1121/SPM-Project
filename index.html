@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Software Project Management System - Group 8</title>
+    <!-- css link -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- header -->
+    <header id="app-header" class="app-header">
+      <div class="header-branding">
+        <h1 id="app-title">Project Management System</h1>
+      </div>
+      <!-- feedback notification banner -->
+      <div
+        id="global-feedback-banner"
+        class="feedback-banner"
+        role="status"
+        aria-live="polite"
+        hidden
+      >
+        <span id="feedback-message"></span>
+      </div>
+    </header>
+
+    <!-- dashboard -->
+    <main id="main-workspace" class="main-workspace">
+      <!-- Empty State (Centered in background when no projects exist) -->
+      <section id="empty-projects-state" class="empty-state" aria-live="polite">
+        <p class="faint-centered-text">No project management systems yet</p>
+      </section>
+
+      <!-- container for project cards -->
+      <section
+        id="projects-grid"
+        class="projects-grid"
+        aria-label="Saved Project Management Systems"
+      >
+        <!-- project cards get javascript functionality -->
+      </section>
+
+      <!-- template for project cards -->
+      <template id="project-card-template">
+        <article class="project-card" data-project-id="">
+          <header class="project-card-header">
+            <h2 class="card-project-title">Untitled Project</h2>
+            <p class="card-project-owner">
+              <strong>Owner/PM:</strong> <span class="owner-name-text"></span>
+            </p>
+          </header>
+          <div class="project-card-body">
+            <p class="card-project-description"></p>
+            <div class="card-summary-badges">
+              <span class="badge team-count-badge"
+                >Team: <strong class="team-count">0</strong></span
+              >
+              <span class="badge risks-count-badge"
+                >Risks: <strong class="risks-count">0</strong></span
+              >
+              <span class="badge reqs-count-badge"
+                >Requirements: <strong class="reqs-count">0</strong></span
+              >
+              <span class="badge hours-total-badge"
+                >Total Effort: <strong class="hours-count">0</strong> hrs</span
+              >
+            </div>
+          </div>
+          <footer class="project-card-footer">
+            <button
+              type="button"
+              class="btn btn-card-open"
+              title="View or Edit Project Details"
+            >
+              Open / Manage
+            </button>
+            <button
+              type="button"
+              class="btn btn-card-delete"
+              title="Delete Project System"
+            >
+              Delete
+            </button>
+          </footer>
+        </article>
+      </template>
+
+      <!-- button (bottom right corner) to add new systems -->
+      <button
+        type="button"
+        id="add-project-fab"
+        class="fab-bottom-right"
+        aria-label="Add a project management system"
+        title="Add Project Management System"
+      >
+        <span class="fab-icon" aria-hidden="true">+</span>
+        <span class="fab-label">Add Project</span>
+      </button>
+    </main>
+
+    <!-- popup for adding a project -->
+    <div
+      id="project-modal-backdrop"
+      class="modal-backdrop"
+      aria-hidden="true"
+      hidden
+    >
+      <div
+        id="project-modal-dialog"
+        class="modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-step-heading"
+      >
+        <!-- title and page number bar -->
+        <header id="modal-header" class="modal-header">
+          <div class="modal-header-left">
+            <h2 id="modal-step-heading" class="modal-title">
+              A. General Project Information
+            </h2>
+          </div>
+          <div class="modal-header-right">
+            <!-- page numbers -->
+            <span
+              id="modal-page-indicator"
+              class="page-number-corner"
+              aria-live="polite"
+              >1/3</span
+            >
+            <button
+              type="button"
+              id="close-modal-btn"
+              class="btn-icon-close"
+              aria-label="Close Project Setup Popup"
+              title="Close"
+            >
+              &times;
+            </button>
+          </div>
+        </header>
+
+        <!-- User-Centered Design Action Feedback inside the Modal -->
+        <div
+          id="modal-action-feedback"
+          class="modal-feedback"
+          role="alert"
+          aria-live="assertive"
+          hidden
+        ></div>
+
+        <!-- wrapper for all pop up pages -->
+        <form id="project-system-form" class="modal-body-form" novalidate>
+          <!-- track project id for saving -->
+          <input
+            type="hidden"
+            id="active-project-id"
+            name="projectId"
+            value=""
+          />
+
+          <!-- Javascript part A -->>
+          <section
+            id="modal-page-1"
+            class="modal-page active-page"
+            data-page-number="1"
+            aria-label="Page 1 of 3: General Project Information"
+          >
+            <div class="page-intro">
+              <p>
+                Enter the foundational details, ownership, team members, and
+                risks for the software project.
+              </p>
+            </div>
+
+            <!-- name / identifier (for card header) -->
+            <div class="form-group">
+              <label for="project-name-input"
+                >Software Project Name / Title:</label
+              >
+              <input
+                type="text"
+                id="project-name-input"
+                name="projectName"
+                placeholder="e.g., Inventory Management System"
+                required
+              />
+            </div>
+
+            <!-- high-level description of the software project -->
+            <fieldset class="feature-fieldset" id="area-a-description">
+              <legend>1. High-Level Project Description</legend>
+              <div class="form-group">
+                <label for="project-description-input"
+                  >High-Level Description of the Software Project
+                  <span class="required-marker">*</span></label
+                >
+                <textarea
+                  id="project-description-input"
+                  name="projectDescription"
+                  rows="4"
+                  placeholder="Describe what the software project is intended to accomplish..."
+                  required
+                ></textarea>
+              </div>
+            </fieldset>
+
+            <!-- owner or the project manager name -->
+            <fieldset class="feature-fieldset" id="area-a-owner">
+              <legend>2. Project Owner / Project Manager</legend>
+              <div class="form-group">
+                <label for="project-owner-input"
+                  >Owner or Project Manager Name
+                  <span class="required-marker">*</span></label
+                >
+                <input
+                  type="text"
+                  id="project-owner-input"
+                  name="projectOwner"
+                  placeholder="Enter the owner or project manager's full name"
+                  required
+                />
+              </div>
+            </fieldset>
+
+            <!-- list of project team members (which may vary as the project progresses) -->
+            <fieldset class="feature-fieldset" id="area-a-team">
+              <legend>3. Project Team Members</legend>
+              <p class="fieldset-help-text">
+                Add or remove project team members as the project progresses.
+              </p>
+
+              <div class="inline-input-controls">
+                <div class="form-group">
+                  <label for="team-member-name-input">Team Member Name</label>
+                  <input
+                    type="text"
+                    id="team-member-name-input"
+                    placeholder="Enter team member name"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="team-member-role-input"
+                    >Role / Responsibility (Optional)</label
+                  >
+                  <input
+                    type="text"
+                    id="team-member-role-input"
+                    placeholder="e.g., Developer, QA, Designer"
+                  />
+                </div>
+                <button
+                  type="button"
+                  id="add-team-member-btn"
+                  class="btn btn-secondary"
+                >
+                  Add Team Member
+                </button>
+              </div>
+
+              <!-- list of team members -->
+              <div class="list-container">
+                <h4>Current Team Members</h4>
+                <ul
+                  id="team-members-list"
+                  class="dynamic-item-list"
+                  aria-live="polite"
+                >
+                  <li id="no-team-members-msg" class="empty-list-placeholder">
+                    No team members added yet.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- team member row template -->
+              <template id="team-member-item-template">
+                <li class="team-member-item" data-member-id="">
+                  <span class="member-name-display"></span>
+                  <span class="member-role-display"></span>
+                  <button
+                    type="button"
+                    class="btn-remove-item btn-remove-member"
+                    aria-label="Remove team member"
+                  >
+                    Remove
+                  </button>
+                </li>
+              </template>
+            </fieldset>
+
+            <!-- list of risks and risk status -->
+            <fieldset class="feature-fieldset" id="area-a-risks">
+              <legend>4. Project Risks and Risk Status</legend>
+              <p class="fieldset-help-text">
+                Record risks associated with the project and update their status
+                as development progresses.
+              </p>
+
+              <div class="inline-input-controls">
+                <div class="form-group">
+                  <label for="risk-description-input">Risk Description</label>
+                  <input
+                    type="text"
+                    id="risk-description-input"
+                    placeholder="e.g., Schedule conflicts, Integration issues"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="risk-likelihood-select">Likelihood</label>
+                  <select id="risk-likelihood-select">
+                    <option value="Low">Low</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="risk-impact-select">Impact</label>
+                  <select id="risk-impact-select">
+                    <option value="Low">Low</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="risk-status-select">Risk Status</label>
+                  <select id="risk-status-select">
+                    <option value="Identified" selected>
+                      Identified / Open
+                    </option>
+                    <option value="Monitoring">Monitoring</option>
+                    <option value="Mitigated">Mitigated</option>
+                    <option value="Occurred">Occurred / Active Issue</option>
+                    <option value="Closed">Closed / Resolved</option>
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  id="add-risk-btn"
+                  class="btn btn-secondary"
+                >
+                  Add Risk
+                </button>
+              </div>
+
+              <!-- risks table -->
+              <div class="table-container">
+                <table id="project-risks-table" class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Risk Description</th>
+                      <th scope="col">Likelihood</th>
+                      <th scope="col">Impact</th>
+                      <th scope="col">Current Status</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="project-risks-tbody" aria-live="polite">
+                    <tr id="no-risks-row" class="empty-table-row">
+                      <td colspan="5">No project risks recorded yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- risks row -->
+              <template id="risk-row-template">
+                <tr class="risk-item-row" data-risk-id="">
+                  <td class="risk-desc-cell"></td>
+                  <td class="risk-likelihood-cell"></td>
+                  <td class="risk-impact-cell"></td>
+                  <td class="risk-status-cell">
+                    <select
+                      class="risk-status-updater"
+                      aria-label="Update Risk Status"
+                    >
+                      <option value="Identified">Identified / Open</option>
+                      <option value="Monitoring">Monitoring</option>
+                      <option value="Mitigated">Mitigated</option>
+                      <option value="Occurred">Occurred / Active Issue</option>
+                      <option value="Closed">Closed / Resolved</option>
+                    </select>
+                  </td>
+                  <td class="risk-actions-cell">
+                    <button
+                      type="button"
+                      class="btn-remove-item btn-remove-risk"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              </template>
+            </fieldset>
+          </section>
+
+          <!-- Javascript part B -->
+          <section
+            id="modal-page-2"
+            class="modal-page"
+            data-page-number="2"
+            aria-label="Page 2 of 3: Project Requirements"
+            hidden
+          >
+            <div class="page-intro">
+              <p>
+                Enter and manage the functional and non-functional requirements
+                for the software project. Requirements entered here will
+                automatically be available for effort tracking on Page 3/3.
+              </p>
+            </div>
+
+            <!-- enter a list of functional and non-functional requirements -->
+            <fieldset class="feature-fieldset" id="area-b-requirements-entry">
+              <legend>Add a Project Requirement</legend>
+
+              <div class="inline-input-controls">
+                <div class="form-group">
+                  <label for="requirement-code-input"
+                    >Requirement ID / Label (Optional)</label
+                  >
+                  <input
+                    type="text"
+                    id="requirement-code-input"
+                    placeholder="e.g., FR-01 or NFR-01"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="requirement-type-select"
+                    >Requirement Category
+                    <span class="required-marker">*</span></label
+                  >
+                  <select id="requirement-type-select" required>
+                    <option value="Functional" selected>
+                      Functional Requirement
+                    </option>
+                    <option value="Non-Functional">
+                      Non-Functional Requirement
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-group form-group-wide">
+                  <label for="requirement-description-input"
+                    >Requirement Description
+                    <span class="required-marker">*</span></label
+                  >
+                  <textarea
+                    id="requirement-description-input"
+                    rows="2"
+                    placeholder="Describe the specific behavior/function (Functional) or system constraint/characteristic (Non-Functional)..."
+                  ></textarea>
+                </div>
+
+                <button
+                  type="button"
+                  id="add-requirement-btn"
+                  class="btn btn-secondary"
+                >
+                  Add Requirement
+                </button>
+              </div>
+            </fieldset>
+
+            <!-- functional and non functional requirements display -->
+            <div class="requirements-lists-wrapper">
+              <!-- functional -->
+              <fieldset
+                class="feature-fieldset"
+                id="functional-requirements-section"
+              >
+                <legend>Functional Requirements</legend>
+                <p class="fieldset-help-text">
+                  Specific behaviors or functions that the software is expected
+                  to provide.
+                </p>
+                <ul
+                  id="functional-requirements-list"
+                  class="dynamic-item-list"
+                  aria-live="polite"
+                >
+                  <li
+                    id="no-functional-reqs-msg"
+                    class="empty-list-placeholder"
+                  >
+                    No functional requirements entered yet.
+                  </li>
+                </ul>
+              </fieldset>
+
+              <!-- non functional -->
+              <fieldset
+                class="feature-fieldset"
+                id="non-functional-requirements-section"
+              >
+                <legend>Non-Functional Requirements</legend>
+                <p class="fieldset-help-text">
+                  Characteristics, quality attributes, or constraints of the
+                  system.
+                </p>
+                <ul
+                  id="non-functional-requirements-list"
+                  class="dynamic-item-list"
+                  aria-live="polite"
+                >
+                  <li
+                    id="no-nonfunctional-reqs-msg"
+                    class="empty-list-placeholder"
+                  >
+                    No non-functional requirements entered yet.
+                  </li>
+                </ul>
+              </fieldset>
+            </div>
+
+            <!-- requirements template -->
+            <template id="requirement-item-template">
+              <li
+                class="requirement-item"
+                data-requirement-id=""
+                data-requirement-type=""
+              >
+                <div class="requirement-item-details">
+                  <strong class="requirement-code-badge"></strong>
+                  <span class="requirement-type-tag"></span>
+                  <p class="requirement-text-display"></p>
+                </div>
+                <div class="requirement-item-actions">
+                  <button
+                    type="button"
+                    class="btn-edit-item btn-edit-requirement"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-remove-item btn-remove-requirement"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </li>
+            </template>
+          </section>
+
+          <!-- Javascript part C -->
+          <section
+            id="modal-page-3"
+            class="modal-page"
+            data-page-number="3"
+            aria-label="Page 3 of 3: Project Effort Monitoring and Tracking"
+            hidden
+          >
+            <div class="page-intro">
+              <p>
+                Record daily or weekly person-hours expended on each requirement
+                across the five development phases, and view total expended
+                hours per requirement.
+              </p>
+            </div>
+
+            <!-- enter effort in person-hours -->
+            <fieldset class="feature-fieldset" id="area-c-effort-logging">
+              <legend>1. Log Development Effort (Daily or Weekly)</legend>
+
+              <div class="effort-entry-grid">
+                <!-- earlier entered requirements (no duplicate data entry) -->
+                <div class="form-group">
+                  <label for="effort-requirement-select"
+                    >Select Requirement
+                    <span class="required-marker">*</span></label
+                  >
+                  <select id="effort-requirement-select" required>
+                    <option value="" disabled selected>
+                      -- Select an entered requirement --
+                    </option>
+                    <!--  populated from page 2/3 requirements -->
+                  </select>
+                </div>
+
+                <!-- daily or weekly logging -->
+                <div class="form-group">
+                  <label for="effort-period-type-select"
+                    >Tracking Interval Basis
+                    <span class="required-marker">*</span></label
+                  >
+                  <select id="effort-period-type-select" required>
+                    <option value="Daily" selected>Daily Basis</option>
+                    <option value="Weekly">Weekly Basis</option>
+                  </select>
+                </div>
+
+                <!-- date or week start -->
+                <div class="form-group">
+                  <label for="effort-date-input"
+                    >Date or Week Starting
+                    <span class="required-marker">*</span></label
+                  >
+                  <input type="date" id="effort-date-input" required />
+                </div>
+              </div>
+
+              <!-- person hours -->
+              <div class="phase-hours-inputs">
+                <h4>Person-Hours Expended by Development Phase</h4>
+                <p class="fieldset-help-text">
+                  Enter the number of person-hours spent on the selected
+                  requirement for each activity during this period:
+                </p>
+
+                <div class="phase-grid">
+                  <div class="form-group">
+                    <label for="hours-req-analysis-input"
+                      >Requirements Analysis (hrs)</label
+                    >
+                    <input
+                      type="number"
+                      id="hours-req-analysis-input"
+                      name="hoursRequirementsAnalysis"
+                      min="0"
+                      step="0.25"
+                      value="0"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="hours-designing-input">Designing (hrs)</label>
+                    <input
+                      type="number"
+                      id="hours-designing-input"
+                      name="hoursDesigning"
+                      min="0"
+                      step="0.25"
+                      value="0"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="hours-coding-input">Coding (hrs)</label>
+                    <input
+                      type="number"
+                      id="hours-coding-input"
+                      name="hoursCoding"
+                      min="0"
+                      step="0.25"
+                      value="0"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="hours-testing-input">Testing (hrs)</label>
+                    <input
+                      type="number"
+                      id="hours-testing-input"
+                      name="hoursTesting"
+                      min="0"
+                      step="0.25"
+                      value="0"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="hours-pm-input">Project Management (hrs)</label>
+                    <input
+                      type="number"
+                      id="hours-pm-input"
+                      name="hoursProjectManagement"
+                      min="0"
+                      step="0.25"
+                      value="0"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions-inline">
+                <button
+                  type="button"
+                  id="log-effort-entry-btn"
+                  class="btn btn-secondary"
+                >
+                  Record Effort Hours
+                </button>
+              </div>
+            </fieldset>
+
+            <!-- view total expended hours by phase for each entered requirement -->
+            <fieldset class="feature-fieldset" id="area-c-effort-totals">
+              <legend>2. Total Expended Hours by Requirement and Phase</legend>
+              <p class="fieldset-help-text">
+                Summary of total person-hours expended across Requirements
+                Analysis, Designing, Coding, Testing, and Project Management for
+                each entered requirement.
+              </p>
+
+              <div class="table-container">
+                <table
+                  id="effort-totals-by-requirement-table"
+                  class="data-table"
+                >
+                  <thead>
+                    <tr>
+                      <th scope="col">Requirement</th>
+                      <th scope="col">Type</th>
+                      <th scope="col">Requirements Analysis (hrs)</th>
+                      <th scope="col">Designing (hrs)</th>
+                      <th scope="col">Coding (hrs)</th>
+                      <th scope="col">Testing (hrs)</th>
+                      <th scope="col">Project Management (hrs)</th>
+                      <th scope="col">Total Requirement Hours</th>
+                    </tr>
+                  </thead>
+                  <tbody id="effort-totals-tbody" aria-live="polite">
+                    <tr id="no-effort-totals-row" class="empty-table-row">
+                      <td colspan="8">
+                        No requirements or effort hours recorded yet.
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr id="project-grand-totals-row" class="grand-totals-row">
+                      <th scope="row" colspan="2">Overall Project Totals:</th>
+                      <td id="grand-total-req-analysis">0</td>
+                      <td id="grand-total-designing">0</td>
+                      <td id="grand-total-coding">0</td>
+                      <td id="grand-total-testing">0</td>
+                      <td id="grand-total-pm">0</td>
+                      <td id="grand-total-all-phases"><strong>0</strong></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <!-- requirements summary row -->
+              <template id="effort-summary-row-template">
+                <tr class="effort-summary-row" data-requirement-id="">
+                  <td class="summary-req-title"></td>
+                  <td class="summary-req-type"></td>
+                  <td class="summary-hrs-analysis">0</td>
+                  <td class="summary-hrs-design">0</td>
+                  <td class="summary-hrs-coding">0</td>
+                  <td class="summary-hrs-testing">0</td>
+                  <td class="summary-hrs-pm">0</td>
+                  <td class="summary-hrs-total"><strong>0</strong></td>
+                </tr>
+              </template>
+            </fieldset>
+
+            <!-- effort log history -->
+            <details
+              id="effort-log-history-details"
+              class="effort-history-section"
+            >
+              <summary>
+                View Individual Daily / Weekly Effort Log Entries
+              </summary>
+              <div class="table-container">
+                <table id="effort-history-table" class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Date / Week</th>
+                      <th scope="col">Interval</th>
+                      <th scope="col">Requirement</th>
+                      <th scope="col">Req. Analysis</th>
+                      <th scope="col">Designing</th>
+                      <th scope="col">Coding</th>
+                      <th scope="col">Testing</th>
+                      <th scope="col">Project Mgmt</th>
+                      <th scope="col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="effort-history-tbody">
+                    <tr id="no-effort-logs-row" class="empty-table-row">
+                      <td colspan="9">
+                        No individual effort logs recorded yet.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <template id="effort-log-row-template">
+                <tr
+                  class="effort-log-item-row"
+                  data-log-id=""
+                  data-requirement-id=""
+                >
+                  <td class="log-date-cell"></td>
+                  <td class="log-interval-cell"></td>
+                  <td class="log-req-cell"></td>
+                  <td class="log-analysis-cell">0</td>
+                  <td class="log-design-cell">0</td>
+                  <td class="log-coding-cell">0</td>
+                  <td class="log-testing-cell">0</td>
+                  <td class="log-pm-cell">0</td>
+                  <td class="log-actions-cell">
+                    <button
+                      type="button"
+                      class="btn-remove-item btn-delete-effort-log"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              </template>
+            </details>
+          </section>
+
+          <!-- popup page navigation -->
+          <footer id="modal-footer" class="modal-footer">
+            <div class="modal-nav-left">
+              <button
+                type="button"
+                id="modal-prev-btn"
+                class="btn btn-outline"
+                hidden
+              >
+                &larr; Previous Page
+              </button>
+            </div>
+
+            <!-- direct jumps -->
+            <div
+              class="modal-step-dots"
+              role="navigation"
+              aria-label="Popup Page Steps"
+            >
+              <button
+                type="button"
+                class="step-dot active"
+                data-target-page="1"
+                aria-label="Go to Page 1: General Info"
+              >
+                1. General
+              </button>
+              <button
+                type="button"
+                class="step-dot"
+                data-target-page="2"
+                aria-label="Go to Page 2: Requirements"
+              >
+                2. Requirements
+              </button>
+              <button
+                type="button"
+                class="step-dot"
+                data-target-page="3"
+                aria-label="Go to Page 3: Effort Tracking"
+              >
+                3. Effort Tracking
+              </button>
+            </div>
+
+            <div class="modal-nav-right">
+              <button type="button" id="modal-next-btn" class="btn btn-primary">
+                Next Page &rarr;
+              </button>
+              <button
+                type="submit"
+                id="modal-save-project-btn"
+                class="btn btn-success"
+              >
+                Save &amp; Close Project
+              </button>
+            </div>
+          </footer>
+        </form>
+      </div>
+    </div>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
