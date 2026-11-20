@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Project Requirements</title>
+</head>
+
+<body>
+
+<h1>Project Requirements</h1>
+
+<p>
+    Enter and manage the functional and
+    non-functional requirements for this project.
+</p>
+
+<form id="requirementForm">
+
+    <label for="requirementType">
+        Requirement Type:
+    </label>
+
+    <select id="requirementType" required>
+        <option value="Functional">
+            Functional Requirement
+        </option>
+
+        <option value="Non-Functional">
+            Non-Functional Requirement
+        </option>
+    </select>
+
+    <br><br>
+
+    <label for="requirementDescription">
+        Requirement Description:
+    </label>
+
+    <br>
+
+    <textarea
+            id="requirementDescription"
+            placeholder="Enter requirement description..."
+            required>
+        </textarea>
+
+    <br><br>
+
+    <button type="submit">
+        Add Requirement
+    </button>
+
+</form>
+
+<hr>
+
+<h2>Functional Requirements</h2>
+
+<ul id="functionalList"></ul>
+
+<h2>Non-Functional Requirements</h2>
+
+<ul id="nonFunctionalList"></ul>
+
+<script src="requirements.js"></script>
+
+</body>
+</html>
